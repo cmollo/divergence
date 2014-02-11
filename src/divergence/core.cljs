@@ -1,4 +1,6 @@
-(ns divergence.core)
+(ns divergence.core
+  (:require [divergence.component :as c]
+            [divergence.system :as s]))
 
 (enable-console-print!)
 
@@ -17,54 +19,32 @@
 (aset (.-scale bunny) "x" 2)
 (aset (.-scale bunny) "y" 2)
 
-(aset (.-anchor bunny) "x" .5)
-(aset (.-anchor bunny) "y" .5)
+;(aset (.-anchor bunny) "x" .5)
+;(aset (.-anchor bunny) "y" .5)
 
 ;(.addChild stage bunny)
 ;(.removeChild stage bunny)
 
-(defn sprite [texture]
-  {:sprite-texture texture
-   :ref nil})
+(def entity->components
+  "A map to an entity and a list of it's components"
+  (atom {}))
 
-(defn on-stage []
-  {:on-stage true})
-
-(defn position [x y rot]
-  {:x x :y y :rot rot})
-
-(defn throw-in-space []
-  {:x-speed 0.5 :y-speed 0 :rot-speed 0.1})
-
-(defn move [{:keys [x-speed y-speed rot-speed ref] :as entity}]
-  (aset ref "rotation" (+ rot-speed (.-rotation ref)))
-  (aset (.-position ref) "x" (mod (+ 0.5 (.-x ref.position)) 480)))
-
-(defn position-setter [entity]
-  (let [{:keys [ref x y rot]} entity]
-    (aset (.-position ref) "x" x)
-    (aset (.-position ref) "y" y)
-    (aset ref "rotation" rot)
-    entity))
-
-(defn sprite-system [entities]
-  (for [e entities]
-    (assoc e :ref (js/PIXI.Sprite. (:sprite-texture e)))))
-
-(defn on-stage-system [stage entities]
-  (doseq [e entities]
-    (when (:on-stage e)
-      (.addChild stage (:ref e))))
-  entities)
+(def component->entities
+  "A map to a component and a list of entities that use it"
+  (atom {}))
 
 (defn entity [name components]
   (apply merge {:name name} components))
 
+(hash :rabbit)
+
 (def bunny-entity
   (entity :bunny [(sprite bunnyTexture)
-                  (position 50 50 0)
+                  (position 50 100 0)
                   (on-stage)
-                  (throw-in-space)]))
+                  (anchor 0.5 0.5)
+                  (throw-in-space)
+                  (scale 2 2)]))
 
 (def entities (atom [bunny-entity]))
 
@@ -76,25 +56,17 @@
    (sprite-system)
    (on-stage-system stage)
    (map position-setter)
+   (map anchor-system)
+   (map scale-system)
    ))
 
-(reset! entities (setup @entities stage))
-(first @entities)
-
-(map position-system @entities)
-
-entities
-
-#_(on-stage-system [{:on-stage true :ref bunny}] stage)
 
 (defn animate []
-  (aset bunny "rotation" (+ 0.01 (.-rotation bunny)))
-  (aset (.-position bunny) "x" (mod (+ 0.5 (.-x bunny.position)) 480))
+  (move (first @entities))
   (.render renderer stage)
   (js/requestAnimationFrame @animate-ref))
 
-(setup stage)
-
+(reset! entities (setup @entities stage))
 (reset! animate-ref animate)
 (js/requestAnimationFrame @animate-ref)
 
