@@ -1,29 +1,14 @@
 (ns divergence.core
   (:require [divergence.component :as c]
+            [divergence.entity :as e]
             [divergence.system :as s]))
 
 (enable-console-print!)
-
-(println "Hello world!")
 
 (def renderer (js/PIXI.autoDetectRenderer. 400 300))
 (js/document.body.appendChild (.-view renderer))
 
 (def stage (js/PIXI.Stage. 0x66FF99))
-
-(def bunnyTexture (js/PIXI.Texture.fromImage "assets/img/bunny.png"))
-(def bunny (js/PIXI.Sprite. bunnyTexture))
-
-(aset (.-position bunny) "x" 180)
-(aset (.-position bunny) "y" 150)
-(aset (.-scale bunny) "x" 2)
-(aset (.-scale bunny) "y" 2)
-
-;(aset (.-anchor bunny) "x" .5)
-;(aset (.-anchor bunny) "y" .5)
-
-;(.addChild stage bunny)
-;(.removeChild stage bunny)
 
 (def entity->components
   "A map to an entity and a list of it's components"
@@ -33,44 +18,42 @@
   "A map to a component and a list of entities that use it"
   (atom {}))
 
-(defn entity [name components]
-  (apply merge {:name name} components))
-
-(hash :rabbit)
-
-(def bunny-entity
-  (entity :bunny [(sprite bunnyTexture)
-                  (position 50 100 0)
-                  (on-stage)
-                  (anchor 0.5 0.5)
-                  (throw-in-space)
-                  (scale 2 2)]))
-
-(def entities (atom [bunny-entity]))
+(def entity-count (atom 0))
 
 (def animate-ref (atom nil) )
 
-(defn setup [entities stage]
-  (->>
-   entities
-   (sprite-system)
-   (on-stage-system stage)
-   (map position-setter)
-   (map anchor-system)
-   (map scale-system)
-   ))
+(defn register-entity! [entity]
+  (let [entity-atom (atom entity)]
+    (swap! entity->components assoc @entity-count entity-atom)
+    (swap! entity-count inc)
+    (doseq [[n component] entity]
+      (swap! component->entities update-in [n] conj entity-atom))))
+
+
+(def entities [(e/bunny stage) (e/some-text stage)])
+
+(defn setup []
+  ;; Register all the entities in our maps
+  (doseq [e entities] (register-entity! e))
+  (let [c->e @component->entities]
+    (s/create-ref (c->e :sprite))
+    (s/create-text (c->e :text))
+    (s/on-stage (c->e :stage))
+    (s/position (c->e :position))
+    (s/anchor (c->e :anchor))
+    (s/scale (c->e :scale))))
 
 
 (defn animate []
-  (move (first @entities))
-  (.render renderer stage)
-  (js/requestAnimationFrame @animate-ref))
+  (let [c->e @component->entities]
+    (.render renderer stage)
+    (s/player-input (c->e :player-input))
+    (s/execute-actions (c->e :actions))
+    (s/move (c->e :velocity))
+    (s/fps-counter (c->e :fps-counter))
+    (js/requestAnimationFrame @animate-ref)))
 
-(reset! entities (setup @entities stage))
 (reset! animate-ref animate)
-(js/requestAnimationFrame @animate-ref)
 
-(comment
-  (reset! animate-ref animate)
-  @animate-ref
- )
+(setup)
+(js/requestAnimationFrame @animate-ref)
