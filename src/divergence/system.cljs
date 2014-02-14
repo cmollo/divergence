@@ -1,14 +1,39 @@
-(ns divergence.system)
+(ns divergence.system
+  (:require [divergence.physics :as phys]))
 
 (defn as [entity k]
   (@entity k))
 
+(defn move-entity [entity [x-speed y-speed rot-speed]]
+  (update-in entity [:position]
+             #(map (partial +) [x-speed y-speed rot-speed] %)))
+
 (defn move [entities]
   (doseq [e entities]
-    (let [{{:keys [x-speed y-speed rot-speed] :as attrs} :velocity ref :ref} @e]
-      (aset ref "rotation" (+ rot-speed (.-rotation ref)))
-      (aset (.-position ref) "x" (mod (+ x-speed (.-x (.-position ref))) 480))
-      (aset (.-position ref) "y" (mod (+ y-speed (.-y (.-position ref))) 480)))))
+    (let [{v :velocity ref :ref} @e]
+      (swap! e move-entity v))))
+
+(defn collide [entities]
+  (let [es (map deref entities)]
+    (doseq [e entities
+            :when (not= (@e :velocity) [0 0 0])
+            :let [{[x-v y-v rot-speed] :velocity} @e]]
+      (let [x-future (move-entity @e [x-v 0 0])
+            y-future (move-entity @e [0 y-v 0])]
+        (when (< 1 (count (filter (partial phys/colliding? x-future) es)))
+          (swap! e assoc-in [:velocity 0] 0))
+        (when (< 1 (count (filter (partial phys/colliding? y-future) es)))
+          (swap! e assoc-in [:velocity 1] 0))))))
+
+(defn accelerate [entities]
+  (doseq [e entities
+          :let [{a :acceleration} @e]]
+    (swap! e update-in [:velocity] #(mapv + a %))))
+
+(defn gravity [entities]
+  (doseq [e entities
+          :let [{g :gravity} @e]]
+    (swap! e update-in [:acceleration] #(mapv + g %))))
 
 (defn anchor [entities]
   (doseq [e entities]
@@ -24,7 +49,7 @@
 
 (defn position [entities]
   (doseq [e entities]
-    (let [{{:keys [x y rot]} :position ref :ref} @e]
+    (let [{[x y rot] :position ref :ref} @e]
       (aset (.-position ref) "x" x)
       (aset (.-position ref) "y" y)
       (aset ref "rotation" rot))))
@@ -32,6 +57,10 @@
 (defn create-ref [entities]
   (doseq [e entities]
     (swap! e assoc :ref (js/PIXI.Sprite. (-> @e :sprite :texture)))))
+
+(defn create-tiling-ref [entities]
+  (doseq [e entities]
+    (swap! e assoc :ref (js/PIXI.TilingSprite. (-> @e :tiling-sprite :texture) 400 400))))
 
 (defn player-input [entities]
   (doseq [e entities]))
@@ -41,7 +70,8 @@
     (.addChild (@e :stage) (@e :ref))))
 
 (def code->key
-  {37 :left
+  {32 :up
+   37 :left
    38 :up
    39 :right
    40 :down})
@@ -66,13 +96,16 @@
   (doseq [e entities
           :let [actions (@e :actions)]]
     (when actions
-      (cond
-       (actions :left) (swap! e assoc-in [:velocity :x-speed] -2)
-       (actions :up) (swap! e assoc-in [:velocity :y-speed] -2)
-       (actions :right) (swap! e assoc-in [:velocity :x-speed] 2)
-       (actions :down) (swap! e assoc-in [:velocity :y-speed] 2)
-       :else (do (swap! e assoc-in [:velocity :x-speed] 0)
-                 (swap! e assoc-in [:velocity :y-speed] 0))))))
+      (when
+        (actions :left) (swap! e assoc-in [:acceleration] [-1 0 0]))
+      (when
+        (actions :up) (swap! e assoc-in [:acceleration] [0 -2 0]))
+      (when
+        (actions :right) (swap! e assoc-in [:acceleration] [1 0 0]))
+      (when
+        (actions :down) (swap! e assoc-in [:acceleration] [0 1 0]))
+      (when (not-any? actions [:up :left :right :down])
+        (swap! e assoc-in [:acceleration] [0 0 0])))))
 
 
 (defn create-text [entities]
