@@ -21,6 +21,9 @@
   (component :position
              [x y rot]))
 
+(defn friction [f]
+  (component :friction [f]))
+
 (defn anchor [x y]
   (component :anchor
              {:x x :y y}))

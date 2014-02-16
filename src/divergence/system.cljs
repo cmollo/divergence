@@ -25,6 +25,25 @@
         (when (< 1 (count (filter (partial phys/colliding? y-future) es)))
           (swap! e assoc-in [:velocity 1] 0))))))
 
+(defn friction
+  [entities]
+  (doseq [e entities]
+    (let [{[vx vy vr] :velocity
+           [ax ay ar] :acceleration
+           [f] :friction
+           } @e
+          ]
+      (when (and (not= 0 vx) (> vx 0))
+        (swap! e assoc-in [:velocity] [(+ vx (/ vx f -1)) vy vr])
+        )
+      (when (and (not= 0 vx) (< vx 0))
+        (swap! e assoc-in [:velocity] [(+ vx (/ vx f -1)) vy vr])
+        )
+      (when (and (> vx -1) (< vx 1))
+        (swap! e assoc-in [:velocity] [0 vy vr]))
+      ));;Andrew
+)
+
 (defn accelerate [entities]
   (doseq [e entities
           :let [{a :acceleration} @e]]
@@ -99,14 +118,26 @@
       (when
         (actions :left) (swap! e assoc-in [:acceleration] [-1 0 0]))
       (when
-        (actions :up) (swap! e assoc-in [:acceleration] [0 -2 0]))
-      (when
         (actions :right) (swap! e assoc-in [:acceleration] [1 0 0]))
       (when
         (actions :down) (swap! e assoc-in [:acceleration] [0 1 0]))
+      (when
+        (actions :up) (swap! e assoc-in [:acceleration] [0 -2 0]))
       (when (not-any? actions [:up :left :right :down])
         (swap! e assoc-in [:acceleration] [0 0 0])))))
 
+(defn movement-caps [entities]
+  (doseq [e entities]
+    (let [actions (@e :actions)
+          {[vx vy vr] :velocity
+           [ax ay ar] :acceleration
+           } @e
+          ]
+      (when (and (not= actions :run) (> vx 3)) (swap! e assoc-in [:velocity] [3 vy vr]))
+      (when (and (not= actions :run) (< vx -3)) (swap! e assoc-in [:velocity] [-3 vy vr]))
+      (when (and (< vy -4) (swap! e assoc-in [:velocity] [vx -4 vr])))
+    ))
+)
 
 (defn create-text [entities]
   (doseq [e entities]
