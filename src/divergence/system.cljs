@@ -41,8 +41,8 @@
         )
       (when (and (> vx -1) (< vx 1))
         (swap! e assoc-in [:velocity] [0 vy vr]))
-      ));;Andrew
-)
+      ))
+);;Andrew
 
 (defn accelerate [entities]
   (doseq [e entities
@@ -137,7 +137,7 @@
       (when (and (not= actions :run) (< vx -3)) (swap! e assoc-in [:velocity] [-3 vy vr]))
       (when (and (< vy -4) (swap! e assoc-in [:velocity] [vx -4 vr])))
     ))
-)
+);;Andrew
 
 (defn create-text [entities]
   (doseq [e entities]

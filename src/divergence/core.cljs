@@ -66,6 +66,7 @@
     (s/fps-counter (c->e :fps-counter))
     (js/requestAnimationFrame @animate-ref)))
 
+
 (reset! animate-ref animate)
 
 (setup entities)

@@ -22,7 +22,7 @@
              [x y rot]))
 
 (defn friction [f]
-  (component :friction [f]))
+  (component :friction [f]));;Andrew
 
 (defn anchor [x y]
   (component :anchor
