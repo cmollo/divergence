@@ -128,20 +128,15 @@
                 [ax ay ar] (@e :acceleration)]]
     (when actions
       (when
-        (actions :left) (swap! e assoc-in [:acceleration] [-2 0 0]))
+        (actions :left) (swap! e assoc-in [:acceleration] [-3 0 0]))
       (when
-        (actions :right) (swap! e assoc-in [:acceleration] [2 0 0]))
+        (actions :right) (swap! e assoc-in [:acceleration] [3 0 0]))
       (when
         (actions :down) (swap! e assoc-in [:acceleration] [0 1 0]))
-      (when (not-any? actions [:up :left :right :down])
-        (swap! e assoc-in [:acceleration] [0 0 0])))
-    (when
-        (and (actions :run) (actions :right)) (swap! e assoc-in [:acceleration] [4 0 0]))
-    (when
-        (and (actions :run) (actions :left)) (swap! e assoc-in [:acceleration] [-4 0 0]))
-    (when
+      (when
         (actions :up) (swap! e assoc-in [:acceleration] [0 -2 0]))
-    ))
+      (when (not-any? actions [:up :left :right :down])
+        (swap! e assoc-in [:acceleration] [0 0 0])))))
 
 (defn movement-caps [entities]
   (doseq [e entities]
@@ -150,8 +145,8 @@
            [ax ay ar] :acceleration
            } @e
           ]
-      (when (and (not (actions :run)) (> vx 6)) (swap! e assoc-in [:velocity] [6 vy vr]))
-      (when (and (not (actions :run)) (< vx -6)) (swap! e assoc-in [:velocity] [-6 vy vr]))
+      (when (and (not (actions :run)) (> vx 8)) (swap! e assoc-in [:velocity] [9 vy vr]))
+      (when (and (not (actions :run)) (< vx -8)) (swap! e assoc-in [:velocity] [-9 vy vr]))
       (when (and (< vy -4) (swap! e assoc-in [:velocity] [vx -4 vr])))
     ))
 );;Andrew
