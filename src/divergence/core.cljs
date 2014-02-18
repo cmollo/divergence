@@ -57,8 +57,8 @@
     (s/player-input (c->e :player-input))
     (s/execute-actions (c->e :actions))
     (s/gravity (c->e :gravity))
-    (s/friction (c->e :velocity))
-    (s/movement-caps (c->e :velocity));;Andrew
+    (s/movement-caps (c->e :velocity))
+    (s/friction (c->e :acceleration))
     (s/accelerate (c->e :acceleration))
     (s/collide (c->e :collidable))
     (s/move (c->e :velocity))

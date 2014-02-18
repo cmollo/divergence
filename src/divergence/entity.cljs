@@ -21,7 +21,7 @@
            c/movable
            (c/position 90 50 0)
            (c/on-stage stage)
-           (c/friction 5);Andrew
+           (c/friction 1)
            c/collidable
            (c/scale 2 2)
            c/accelerates
@@ -35,7 +35,7 @@
            (c/position x y 0)
            (c/scale scale-x scale-y)
            c/collidable
-           (c/friction 0.5)
+           (c/friction 5)
            (c/on-stage stage)]))
 
 (def horizontal-full-block

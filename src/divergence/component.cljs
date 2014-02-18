@@ -1,6 +1,5 @@
 (ns divergence.component)
 
-
 (defn component [name attributes]
   "Simple returns a hashmap of the name and attributes"
   {:name name
@@ -22,7 +21,7 @@
              [x y rot]))
 
 (defn friction [f]
-  (component :friction [f]));;Andrew
+  (component :friction [f]))
 
 (defn anchor [x y]
   (component :anchor

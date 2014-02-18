@@ -12,5 +12,4 @@ var physics = {
       topLeft2[0] < bottomRight1[0]
     )
   }
-
 }
