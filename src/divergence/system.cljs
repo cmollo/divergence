@@ -45,14 +45,13 @@
            } @e
           actions (@e :actions)
           ]
-      (when (and (not= 0 vx) (not (actions :up)))
+      (when (and (not= 0 vx) (empty? actions))
         (when (or (<= vx -0.5) (>= vx 0.5))
           (when (<= vx -0.5)
             (swap! e assoc-in [:acceleration] [(* (/ vx vx) f) ay ar]))
           (when (>= vx 0.5)
             (swap! e assoc-in [:acceleration] [(* (/ vx vx) f -1) ay ar])))
-        (when (and (> vx -0.5) (< vx 0.5)) (swap! e assoc-in [:acceleration] [(* vx -1) ay ar])))
-      )))
+        (when (and (> vx -0.5) (< vx 0.5)) (swap! e assoc-in [:acceleration] [(* vx -1) ay ar]))))))
 
 (defn accelerate [entities]
   (doseq [e entities
@@ -145,8 +144,8 @@
            [ax ay ar] :acceleration
            } @e
           ]
-      (when (and (not (actions :run)) (> vx 8)) (swap! e assoc-in [:velocity] [9 vy vr]))
-      (when (and (not (actions :run)) (< vx -8)) (swap! e assoc-in [:velocity] [-9 vy vr]))
+      (when (and (not (actions :run)) (> vx 4)) (swap! e assoc-in [:velocity] [5 vy vr]))
+      (when (and (not (actions :run)) (< vx -4)) (swap! e assoc-in [:velocity] [-5 vy vr]))
       (when (and (< vy -4) (swap! e assoc-in [:velocity] [vx -4 vr])))
     ))
 );;Andrew
