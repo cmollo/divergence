@@ -61,12 +61,20 @@
 (def accelerates
   (component :acceleration [0 0 0]))
 
-(def time-based-state
-  "Anything whose state (e.g. position, velocity...) changes based of time"
-  (component :time-base-state true))
-
 (defn gravity
   "Gravity settings should be:
    [x-acceleration y-acceleration rot-acceleration]"
   [gravity-settings]
   (component :gravity gravity-settings))
+
+(defn time-based-state
+  "Anything whose state (e.g. position, velocity...) changes based of time. You should name it so it is recognizable in the timestream"
+  [name]
+  (component :time-base-state name))
+
+(defn timestream
+  "stores time-based state"
+  []
+  (component :timestream {:timestream []
+                          :timeline 0
+                          :prev-node :origin}))

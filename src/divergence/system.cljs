@@ -103,6 +103,7 @@
    38 :up
    39 :right
    40 :down
+   16 :shift
    69 :run})
 
 (def key-inputs (atom #{}))

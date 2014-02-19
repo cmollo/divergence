@@ -50,3 +50,6 @@
            (c/position 20 10 0)
            c/fps-counter
            (c/on-stage stage)]))
+
+(defn timestream []
+  (entity [(c/timestream)]))
