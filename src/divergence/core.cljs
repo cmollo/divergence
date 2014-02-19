@@ -51,6 +51,15 @@
     (s/scale (c->e :scale))))
 
 
+(defn resetGame []
+    (reset! component->entities {})
+    (reset! entity->components {})
+    (reset! entity-count 0)
+    (reset! animate-ref nil)
+    (setup entities)
+    )
+
+
 (defn animate []
   (let [c->e @component->entities]
     (.render renderer stage)
@@ -63,6 +72,7 @@
     (s/collide (c->e :collidable))
     (s/move (c->e :velocity))
     (s/position (c->e :position))
+    (s/jump-caps (c->e :position))
     (s/fps-counter (c->e :fps-counter))
     (js/requestAnimationFrame @animate-ref)))
 
