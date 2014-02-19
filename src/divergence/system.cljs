@@ -1,6 +1,17 @@
 (ns divergence.system
   (:require [divergence.physics :as phys]))
 
+(comment
+  (defn time-point [entities id]
+    {:id id :state entities})
+
+  (defn time-line [time-point id]
+    {:id id :timepoints time-point}
+    )
+  (defn time-stream [time-line id]
+    {:id id :timelines time-line})
+)
+
 (defn as [entity k]
   (@entity k))
 
@@ -24,6 +35,23 @@
           (swap! e assoc-in [:velocity 0] 0))
         (when (< 1 (count (filter (partial phys/colliding? y-future) es)))
           (swap! e assoc-in [:velocity 1] 0))))))
+
+(defn friction
+  [entities]
+  (doseq [e entities]
+    (let [{[vx vy vr] :velocity
+           [ax ay ar] :acceleration
+           [f] :friction
+           } @e
+          actions (@e :actions)
+          ]
+      (when (and (not= 0 vx) (empty? actions))
+        (when (or (<= vx -0.5) (>= vx 0.5))
+          (when (<= vx -0.5)
+            (swap! e assoc-in [:acceleration] [(* (/ vx vx) f) ay ar]))
+          (when (>= vx 0.5)
+            (swap! e assoc-in [:acceleration] [(* (/ vx vx) f -1) ay ar])))
+        (when (and (> vx -0.5) (< vx 0.5)) (swap! e assoc-in [:acceleration] [(* vx -1) ay ar]))))))
 
 (defn accelerate [entities]
   (doseq [e entities
@@ -74,7 +102,8 @@
    37 :left
    38 :up
    39 :right
-   40 :down})
+   40 :down
+   69 :run})
 
 (def key-inputs (atom #{}))
 
@@ -94,19 +123,32 @@
 
 (defn execute-actions [entities]
   (doseq [e entities
-          :let [actions (@e :actions)]]
+          :let [actions (@e :actions)
+                [ax ay ar] (@e :acceleration)]]
     (when actions
       (when
-        (actions :left) (swap! e assoc-in [:acceleration] [-1 0 0]))
+        (actions :left) (swap! e assoc-in [:acceleration] [-3 0 0]))
       (when
-        (actions :up) (swap! e assoc-in [:acceleration] [0 -2 0]))
-      (when
-        (actions :right) (swap! e assoc-in [:acceleration] [1 0 0]))
+        (actions :right) (swap! e assoc-in [:acceleration] [3 0 0]))
       (when
         (actions :down) (swap! e assoc-in [:acceleration] [0 1 0]))
+      (when
+        (actions :up) (swap! e assoc-in [:acceleration] [0 -2 0]))
       (when (not-any? actions [:up :left :right :down])
         (swap! e assoc-in [:acceleration] [0 0 0])))))
 
+(defn movement-caps [entities]
+  (doseq [e entities]
+    (let [actions (@e :actions)
+          {[vx vy vr] :velocity
+           [ax ay ar] :acceleration
+           } @e
+          ]
+      (when (and (not (actions :run)) (> vx 4)) (swap! e assoc-in [:velocity] [5 vy vr]))
+      (when (and (not (actions :run)) (< vx -4)) (swap! e assoc-in [:velocity] [-5 vy vr]))
+      (when (and (< vy -4) (swap! e assoc-in [:velocity] [vx -4 vr])))
+    ))
+);;Andrew
 
 (defn create-text [entities]
   (doseq [e entities]

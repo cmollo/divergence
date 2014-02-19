@@ -57,12 +57,15 @@
     (s/player-input (c->e :player-input))
     (s/execute-actions (c->e :actions))
     (s/gravity (c->e :gravity))
+    (s/movement-caps (c->e :velocity))
+    (s/friction (c->e :acceleration))
     (s/accelerate (c->e :acceleration))
     (s/collide (c->e :collidable))
     (s/move (c->e :velocity))
     (s/position (c->e :position))
     (s/fps-counter (c->e :fps-counter))
     (js/requestAnimationFrame @animate-ref)))
+
 
 (reset! animate-ref animate)
 
