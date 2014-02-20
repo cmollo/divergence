@@ -72,7 +72,6 @@
     (s/collide (c->e :collidable))
     (s/move (c->e :velocity))
     (s/position (c->e :position))
-    (s/jump-caps (c->e :position))
     (s/fps-counter (c->e :fps-counter))
     (js/requestAnimationFrame @animate-ref)))
 

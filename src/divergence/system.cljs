@@ -12,6 +12,10 @@
     {:id id :timelines time-line})
 )
 
+(def on-ground (atom 1))
+
+(def can-climb (atom 0))
+
 (defn as [entity k]
   (@entity k))
 
@@ -32,9 +36,13 @@
       (let [x-future (move-entity @e [x-v 0 0])
             y-future (move-entity @e [0 y-v 0])]
         (when (< 1 (count (filter (partial phys/colliding? x-future) es)))
-          (swap! e assoc-in [:velocity 0] 0))
+          (swap! e assoc-in [:velocity 0] 0)
+          (reset! can-climb 1) ;when character hits wall, can climb - Chelsea
+          )
         (when (< 1 (count (filter (partial phys/colliding? y-future) es)))
-          (swap! e assoc-in [:velocity 1] 0))))))
+          (reset! on-ground 1) ;when character hits ground, can jump - Chelsea
+          (swap! e assoc-in [:velocity 1] 0)
+          )))))
 
 (defn friction
   [entities]
@@ -127,13 +135,29 @@
                 [ax ay ar] (@e :acceleration)]]
     (when actions
       (when
-        (actions :left) (swap! e assoc-in [:acceleration] [-3 0 0]))
+        (actions :left)
+        (swap! e assoc-in [:acceleration] [-3 0 0])
+        (reset! can-climb 0) ;when pressing left, turn gravity back on and climb mode off
+        (swap! e assoc-in [:gravity] [0 0.2 0])
+        )
       (when
-        (actions :right) (swap! e assoc-in [:acceleration] [3 0 0]))
+        (actions :right)
+        (swap! e assoc-in [:acceleration] [3 0 0])
+        (reset! can-climb 0) ;when pressing right, turn gravity back on and climb mode off
+        (swap! e assoc-in [:gravity] [0 0.2 0])
+        )
       (when
         (actions :down) (swap! e assoc-in [:acceleration] [0 1 0]))
       (when
-        (actions :up) (swap! e assoc-in [:acceleration] [0 -2 0]))
+        (and (= @on-ground 1) (actions :up))
+        (swap! e assoc-in [:acceleration] [0 -2 0])
+        (reset! on-ground 0) ;caps the jump - Chelsea
+        )
+      (when
+        (and (= @can-climb 1) (actions :up)) ;climb function
+        (swap! e assoc-in [:acceleration] [0 -2 0])
+        (swap! e assoc-in [:gravity] [0 0 0]) ;turns off the gravity
+        )
       (when (not-any? actions [:up :left :right :down])
         (swap! e assoc-in [:acceleration] [0 0 0])))))
 
@@ -149,18 +173,6 @@
       (when (and (< vy -4) (swap! e assoc-in [:velocity] [vx -4 vr])))
     ))
 );;Andrew
-
-
-(defn jump-caps [entities]
-  (doseq [e entities]
-    (let [actions (@e :actions)
-          {[vx vy vr] :velocity
-           [x y rot] :position
-           } @e
-          ]
-      (when (and (< y -50)) (swap! e assoc-in [:position] [x -40 rot]))
-    ))
-);;Chelsea
 
 
 (defn create-text [entities]
