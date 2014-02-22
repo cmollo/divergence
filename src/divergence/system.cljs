@@ -102,8 +102,7 @@
    37 :left
    38 :up
    39 :right
-   40 :down
-   69 :run})
+   40 :down})
 
 (def key-inputs (atom #{}))
 
@@ -144,11 +143,34 @@
            [ax ay ar] :acceleration
            } @e
           ]
-      (when (and (not (actions :run)) (> vx 4)) (swap! e assoc-in [:velocity] [5 vy vr]))
-      (when (and (not (actions :run)) (< vx -4)) (swap! e assoc-in [:velocity] [-5 vy vr]))
+      (when (> vx 4) (swap! e assoc-in [:velocity] [5 vy vr]))
+      (when (< vx -4) (swap! e assoc-in [:velocity] [-5 vy vr]))
       (when (and (< vy -4) (swap! e assoc-in [:velocity] [vx -4 vr])))
     ))
-);;Andrew
+)
+
+(defn move-background [entities]
+  (doseq [e entities
+          :let [actions (@e :actions)
+                [x y r] (@e :position)
+                ]]
+    (when actions
+      (when (and (actions :left) (= (@e :name) :bunny) (not (zero? (nth (@e :velocity) 0))))
+        (doseq [e entities
+                :let [actions (@e :actions)
+                     [x y r] (@e :position)
+                ]]
+          (when  (= (@e :name) :bg) (swap! e assoc-in [:position] [(+ x 5) y r]))))
+      (when (and (actions :right) (= (@e :name) :bunny) (not (zero? (nth (@e :velocity) 0))))
+        (doseq [e entities
+                :let [actions (@e :actions)
+                     [x y r] (@e :position)
+                ]]
+          (when  (= (@e :name) :bg) (swap! e assoc-in [:position] [(- x 5) y r]))))
+      )))
+
+(defn goal? [entities]
+  ())
 
 (defn create-text [entities]
   (doseq [e entities]
