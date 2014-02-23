@@ -16,6 +16,26 @@
 
 (def can-climb (atom 0))
 
+(def serial-data (atom ""))
+
+(defn save-to-local-db []
+  ;(js/alert @serial-data)
+  (.setItem js/localStorage "dm" @serial-data)
+  )
+
+(defn serialize [entities]
+  (doseq [e entities]
+    (if (= ":bunny" (pr-str(@e :name)))
+      (do(reset! serial-data @e)
+         (save-to-local-db @e)))))
+
+(defn deserialize [entities]
+  ;(reset! serial-data (.getItem js/localStorage "dm")) <-- This is for loading from local storage. Not working.
+  ;(js/alert @serial-data)
+   (doseq [e entities]
+     (if (= ":bunny" (pr-str(@e :name)))
+      (reset! e @serial-data))))
+
 (defn as [entity k]
   (@entity k))
 
