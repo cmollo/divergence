@@ -47,6 +47,9 @@
 (def movable
   (component :velocity [0 0 0]))
 
+(def pushable
+  (component :pushable true))
+
 (defn text [string style]
   (component :text
              {:string string

@@ -3,6 +3,7 @@
 
 (def bunnyTexture (js/PIXI.Texture.fromImage "assets/img/bunny.png"))
 (def blockTexture (js/PIXI.Texture.fromImage "assets/img/Brick_Block.png"))
+(def boxTexture (js/PIXI.Texture.fromImage "assets/img/box.png"))
 
 (defn entity [components]
   (reduce
@@ -38,6 +39,23 @@
            (c/friction 5)
            (c/on-stage stage)]))
 
+
+(defn box [x y stage]
+  (entity [(c/named :box)
+           (c/sprite boxTexture)
+           c/create-ref
+           c/accelerates
+           c/movable
+           c/has-actions
+           c/pushable
+           c/collidable
+           (c/friction 1)
+           (c/gravity [0 .2 0])
+           (c/position x y 0)
+           (c/on-stage stage)
+           (c/scale .5 .5)
+           ]))
+
 (def horizontal-full-block
   (partial block 2 .1))
 
@@ -50,3 +68,4 @@
            (c/position 20 10 0)
            c/fps-counter
            (c/on-stage stage)]))
+

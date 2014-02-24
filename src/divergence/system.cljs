@@ -36,6 +36,20 @@
         (when (< 1 (count (filter (partial phys/colliding? y-future) es)))
           (swap! e assoc-in [:velocity 1] 0))))))
 
+
+(defn push [entities player]
+  (doseq [p player]
+    (when (not= (@p :velocity) [0 0 0])
+      (let [{[x-v y-v rot-speed] :velocity} @p]
+        (let [x-future (move-entity @p [x-v 0 0])
+                y-future (move-entity @p [y-v 0 0])]
+          (doseq [e entities]
+            (when (phys/colliding? x-future @e)
+              (swap! e assoc-in [:velocity 0] 1))
+            (when (phys/colliding? y-future @e)
+              (swap! e assoc-in [:velocity 1] 1)))
+          )))))
+
 (defn friction
   [entities]
   (doseq [e entities]
