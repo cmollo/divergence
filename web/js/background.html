@@ -1,0 +1,113 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+
+		<title>
+			Animated Background
+		</title>
+	
+		<style type = "text/css">
+			body {margin: 10px; background: #CCC; }
+			#canvas_container {width:1000px; margin: 20px auto;}
+			#my_canvas {background: #FFF; border: #999 1px solid;}
+		</style>
+		
+		<script>
+			
+			var bg = new Image();
+			bg.src = "star.jpg";
+			
+			function initCanvas() {
+				var ctx = document.getElementById('my_canvas').getContext('2d');
+				var cW = ctx.canvas.width;
+				var cH = ctx.canvas.height;
+				
+				var dist = 2;
+				
+				function Background () {
+					this.x = 0;
+					this.y = 0;
+					this.w = bg.width;
+					this.h = bg.height;
+					this.render = function() {
+						ctx.drawImage(bg, this.x--, 0);
+						
+						if (this.x <= -499)
+						{
+							this.x = 0;
+						}
+					}
+				}
+				
+				
+				function Player () {
+					this.x = 0;
+					this.y = 0;
+					this.w = 50;
+					this.h = 50;
+					this.render = function() {
+						ctx.fillStyle = "red";
+						ctx.fillRect (this.x, this.y, this.w, this.h);
+					}
+				}	
+				
+				var player = new Player();
+				player.x = 100;
+				player.y = 225;
+				var background = new Background();
+				
+				function animate() {
+					ctx.save();
+					ctx.clearRect(0, 0, cW, cH);
+					//start here
+					
+					background.render();
+					player.render();
+					// stop here
+					ctx.restore();
+				}
+				var animateInterval = setInterval (animate, 30);
+				
+				document.addEventListener('keydown', function(event) {
+					var key_press = String.fromCharCode(event.keyCode);
+					//alert(event.keyCode + " | " + key_press);
+					
+					if (key_press == "W")
+					{
+						player.y = player.y-dist;
+					}
+					
+					else if (key_press == "S")
+					{
+						player.y = player.y+dist;
+					}
+					
+					else if (key_press == "A")
+					{
+						player.x = player.x-dist;
+					}
+					
+					else if (key_press == "D")
+					{
+						player.x = player.x+dist;
+					}
+				});
+			}
+			
+			window.addEventListener('load', function(event) {
+				initCanvas();
+			});
+		</script>
+
+	</head>
+	
+	<body>
+		
+		<div id = "canvas_container">
+			<canvas id = "my_canvas" width = "1000" height = "500">
+			</canvas>
+		</div>
+
+	</body>
+	
+</html>
