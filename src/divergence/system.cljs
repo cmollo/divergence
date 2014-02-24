@@ -45,10 +45,7 @@
                 y-future (move-entity @p [y-v 0 0])]
           (doseq [e entities]
             (when (phys/colliding? x-future @e)
-              (swap! e assoc-in [:velocity 0] 1))
-            (when (phys/colliding? y-future @e)
-              (swap! e assoc-in [:velocity 1] 1)))
-          )))))
+              (swap! e assoc-in [:velocity 0] (* (compare x-v 0) 2)))))))))
 
 (defn friction
   [entities]
