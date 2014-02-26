@@ -2,16 +2,14 @@
   (:require [divergence.component :as c]
             [divergence.entity :as e]))
 
-(def canvas (js/document.getElementById ""))
+(def canvas (js/document.getElementById "game"))
+(def entities [])
 
-(defn set-entity [x y id]
+(defn set-entity [entities x y id]
   (case id
-    0 (entities conj)
-    1 ()
-    2 ()
-    3 ()
+    0 (entities conj 5)
     )
-
+)
 (defn parse-click [event]
 	(let [cx (.-pageX event)
 		  cy (.-pageY event)
@@ -23,7 +21,7 @@
 		  height (.height canvas)
 		  width (.width canvas)
 		]
-    (set-entity x y 0)
+    (set-entity entities x y 0)
     ))
 
 
